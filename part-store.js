@@ -1,6 +1,7 @@
 let fs = require('fs');
 let requestPromise = require('request-promise-native');
 let chalk = require('chalk');
+let log = console.log;
 
 async function uploadParts(parts) {
   let count = 0;
@@ -9,7 +10,7 @@ async function uploadParts(parts) {
     let uploadedImage = await uploadImage(part.fileName);
 
     if (uploadedImage) {
-      console.log(chalk.green(`Upload image ${part.id} success`));
+      log(chalk.green(`Upload image ${part.id} success`));
 
       let result = await uploadData({
         ...part.data,
@@ -18,16 +19,16 @@ async function uploadParts(parts) {
 
       if (result) {
         if (result.error) {
-          console.log(chalk.yellow(result.error));
+          log(chalk.yellow(result.error));
         } else {
-          console.log(chalk.green(`Upload part ${part.id} success`));
+          log(chalk.green(`Upload part ${part.id} success`));
           ++ count;
         }
       } else {
-        console.log(chalk.red(`Failed upload part ${part.id}.`));
+        log(chalk.red(`Failed upload part ${part.id}.`));
       }
     } else {
-      console.log(chalk.red(`Failed upload part image ${part.id}. Ignore this part.`));
+      log(chalk.red(`Failed upload part image ${part.id}. Ignore this part.`));
     }
   }
 
@@ -60,7 +61,7 @@ function uploadImage(fileName) {
       return 200 === response.statusCode ? response.body : null;
     })
     .catch(error => {
-      console.log(chalk.red(error.message));
+      log(chalk.red(error.message));
       return null;
     });
 }
@@ -90,7 +91,7 @@ function uploadData(part) {
       return 200 === response.statusCode ? response.body : null;
     })
     .catch(error => {
-      console.log(chalk.red(error.message));
+      log(chalk.red(error.message));
       return null;
     });
 }
