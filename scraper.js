@@ -58,7 +58,7 @@ function getFormattedData(data) {
       family: data.colorFamily,
       code: data.rgb,
       type: data.colorType,
-      legoId: data.legoColorId
+      legoId: Number(data.legoColorId)
     },
     sourceImageUrl: data.sourceImageUrl
   };
