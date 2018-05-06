@@ -2,6 +2,7 @@
 .DS_Store
 
 # Folders to ignore
+coverage
 node_modules
 !temp/.gitinclude
 temp/*

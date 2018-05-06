@@ -4,6 +4,9 @@ node_js: 9
 
 install: yarn install
 
+script:
+  - yarn test
+
 cache:
   yarn: true
 
