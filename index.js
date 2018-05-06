@@ -1,5 +1,6 @@
 let fs = require('fs');
 let chalk = require('chalk');
+let config = require('dotenv').config();
 let scraper = require('./scraper');
 let { downloadPartImage } = require('./part-image');
 let { uploadParts } = require('./part-store');

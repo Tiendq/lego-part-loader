@@ -2,9 +2,6 @@ let fs = require('fs');
 let requestPromise = require('request-promise-native');
 let chalk = require('chalk');
 
-const ACCESS_TOKEN = 'token';
-const STORE_URL = process.env.STORE_URL || 'http://localhost:8086';
-
 async function uploadParts(parts) {
   let count = 0;
 
@@ -40,9 +37,9 @@ async function uploadParts(parts) {
 function uploadImage(fileName) {
   let options = {
     method: 'POST',
-    url: `${STORE_URL}/upload/part`,
+    url: `${process.env.STORE_URL}/upload/part`,
     headers: {
-      'Access-Token': ACCESS_TOKEN
+      'Access-Token': process.env.ACCESS_TOKEN
     },
     formData: {
       image: {
@@ -71,9 +68,9 @@ function uploadImage(fileName) {
 function uploadData(part) {
   let options = {
     method: 'POST',
-    url: `${STORE_URL}/api/part`,
+    url: `${process.env.STORE_URL}/api/part`,
     headers: {
-      'Access-Token': ACCESS_TOKEN
+      'Access-Token': process.env.ACCESS_TOKEN
     },
     body: {
       ...part,
