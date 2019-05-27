@@ -1,5 +1,5 @@
-let requestPromise = require('request-promise-native');
-let cheerio = require('cheerio');
+const requestPromise = require('request-promise-native');
+const cheerio = require('cheerio');
 
 async function getPartData(partId) {
   try {
@@ -43,7 +43,7 @@ function parseContent(content) {
     colorType: $(properties[10]).text(),
     legoColorId: $(properties[11]).text(),
     sourceImageUrl
-  };
+  }
 }
 
 function getFormattedData(data) {
@@ -61,9 +61,9 @@ function getFormattedData(data) {
       legoId: Number(data.legoColorId)
     },
     sourceImageUrl: data.sourceImageUrl
-  };
+  }
 }
 
 module.exports = {
   getPartData
-};
+}

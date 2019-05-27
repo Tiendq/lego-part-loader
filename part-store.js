@@ -1,6 +1,7 @@
-let fs = require('fs');
-let requestPromise = require('request-promise-native');
-let chalk = require('chalk');
+const fs = require('fs');
+const requestPromise = require('request-promise-native');
+const chalk = require('chalk');
+
 let log = console.log;
 
 async function uploadParts(parts) {
@@ -54,7 +55,7 @@ function uploadImage(fileName) {
     json: true,
     simple: false,
     resolveWithFullResponse: true
-  };
+  }
 
   return requestPromise(options)
     .then(response => {
@@ -84,7 +85,7 @@ function uploadData(part) {
     json: true,
     simple: false,
     resolveWithFullResponse: true
-  };
+  }
 
   return requestPromise(options)
     .then(response => {
@@ -98,4 +99,4 @@ function uploadData(part) {
 
 module.exports = {
   uploadParts
-};
+}

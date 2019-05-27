@@ -1,12 +1,13 @@
-let fs = require('fs');
-let chalk = require('chalk');
-let config = require('dotenv').config();
-let scraper = require('./scraper');
-let { downloadPartImage } = require('./part-image');
-let { uploadParts } = require('./part-store');
+const fs = require('fs');
+const chalk = require('chalk');
+const config = require('dotenv-safe').config();
+const scraper = require('./scraper');
+const { downloadPartImage } = require('./part-image');
+const { uploadParts } = require('./part-store');
 
 let log = console.log;
-let partIds = [], parsedParts = [];
+let partIds = [];
+let parsedParts = [];
 
 async function start() {
   log('*** Read input parts for retrieving data...');
@@ -20,7 +21,7 @@ async function start() {
       let data = await loadPartData(id);
       parsedParts.push(data);
     }
-  };
+  }
 
   if (0 === parsedParts.length) {
     log(chalk.yellow('*** No part found. Exit.'));
@@ -36,7 +37,7 @@ async function start() {
       part.fileName = `${part.id}.jpg`;
       await downloadPartImage(part.data.sourceImageUrl, part.fileName);
     }
-  };
+  }
 
   log('*** Uploading parts to store...');
   let count = await uploadParts(parsedParts);
@@ -57,7 +58,7 @@ async function loadPartData(id) {
   return {
     id,
     data
-  };
+  }
 }
 
 function readInputPartIds() {
