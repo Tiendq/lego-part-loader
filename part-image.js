@@ -9,7 +9,7 @@ async function downloadPartImage(url, fileName) {
 
   return requestPromise(options).then(response => {
     let buffer = Buffer.from(response, 'utf8');
-    fs.writeFileSync(`temp/${fileName}`, buffer);
+    fs.writeFileSync(fileName, buffer);
   });
 }
 

@@ -1,39 +1,33 @@
 const fs = require('fs');
+const path = require('path');
 const requestPromise = require('request-promise-native');
 const chalk = require('chalk');
 
 let log = console.log;
 
-async function uploadParts(parts) {
-  let count = 0;
+async function uploadPart(part) {
+  let uploadedImage = await uploadImage(part.fileName);
 
-  for (let part of parts) {
-    let uploadedImage = await uploadImage(part.fileName);
+  if (uploadedImage) {
+    log(chalk.green(`Upload image ${part.id} successfully to ${uploadedImage.imageUrl}`));
 
-    if (uploadedImage) {
-      log(chalk.green(`Upload image ${part.id} success`));
+    let result = await uploadData({
+      ...part.data,
+      imageUrl: uploadedImage.imageUrl
+    });
 
-      let result = await uploadData({
-        ...part.data,
-        imageUrl: uploadedImage.imageUrl
-      });
-
-      if (result) {
-        if (result.error) {
-          log(chalk.yellow(result.error));
-        } else {
-          log(chalk.green(`Upload part ${part.id} success`));
-          ++ count;
-        }
+    if (result) {
+      if (result.error) {
+        log(chalk.yellow(result.error));
       } else {
-        log(chalk.red(`Failed upload part ${part.id}.`));
+        log(chalk.green(`Upload part ${part.id} success`));
       }
     } else {
-      log(chalk.red(`Failed upload part image ${part.id}. Ignore this part.`));
+      log(chalk.red(`Failed upload part ${part.id}.`));
     }
+  } else {
+    log(chalk.red(`Failed upload part image ${part.id}. Ignore this part.`));
   }
-
-  return count;
 }
 
 function uploadImage(fileName) {
@@ -45,9 +39,9 @@ function uploadImage(fileName) {
     },
     formData: {
       image: {
-        value: fs.createReadStream(`temp/${fileName}`),
+        value: fs.createReadStream(fileName),
         options: {
-          filename: fileName,
+          filename: path.basename(fileName),
           contentType: 'image/jpg'
         }
       }
@@ -98,5 +92,5 @@ function uploadData(part) {
 }
 
 module.exports = {
-  uploadParts
+  uploadPart
 }

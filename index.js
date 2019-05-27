@@ -1,70 +1,64 @@
 const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const chalk = require('chalk');
 const config = require('dotenv-safe').config();
 const scraper = require('./scraper');
 const { downloadPartImage } = require('./part-image');
-const { uploadParts } = require('./part-store');
-
-let log = console.log;
-let partIds = [];
-let parsedParts = [];
+const { uploadPart } = require('./part-store');
 
 async function start() {
-  log('*** Read input parts for retrieving data...');
+  let partIds = readInputPartIds();
 
-  partIds = readInputPartIds();
-
-  log('*** Retrieving part data...');
-
-  for (let id of partIds) {
-    if (id) {
-      let data = await loadPartData(id);
-      parsedParts.push(data);
-    }
-  }
-
-  if (0 === parsedParts.length) {
-    log(chalk.yellow('*** No part found. Exit.'));
+  if (partIds)
+    console.log(`Found ${partIds.length} part IDs from file parts.txt`);
+  else
     return false;
-  }
 
-  log('*** Retrieving part image...');
+  let downloadTempDir = fs.mkdtempSync(os.tmpdir() + '/');
+  let validIds = partIds.filter(id => id.length > 0);
+  let count = 0;
 
-  for (let part of parsedParts) {
-    if (part.data) {
-      log(`Download image ${part.id}`);
+  for (let id of validIds) {
+    let part = await loadPartData(id);
 
-      part.fileName = `${part.id}.jpg`;
+    if (part) {
+      part.fileName = path.join(downloadTempDir, part.id + '.jpg');
+      console.log(`Downloading part image ${part.id} to ${part.fileName}`);
       await downloadPartImage(part.data.sourceImageUrl, part.fileName);
+
+      console.log('Uploading part to store');
+      await uploadPart(part);
     }
   }
 
-  log('*** Uploading parts to store...');
-  let count = await uploadParts(parsedParts);
+  console.log(`Done. Uploaded ${count} of ${partIds.length} parts.`);
+}
 
-  log(`*** Done. Uploaded ${count} of ${parsedParts.length} parts.`);
+function readInputPartIds() {
+  try {
+    let content = fs.readFileSync('parts.txt', 'utf8');
+    return content.length > 0 ? content.split(/\r?\n/) : null;
+  } catch (error) {
+    console.error(error.message);
+    return null;
+  }
 }
 
 async function loadPartData(id) {
-  log(`Parsing part ${id}`);
+  console.log(`Parsing part ${id}`);
 
   let data = await scraper.getPartData(id);
 
   if (!data)
-    log(chalk.red('Parse error'));
+    console.log(chalk.red('Parse error'));
   else
-    log(chalk.green('Parse success'));
+    console.log(chalk.green('Parse success'));
 
   return {
     id,
     data
   }
-}
-
-function readInputPartIds() {
-  let content = fs.readFileSync('parts.txt', { encoding: 'utf8' });
-  let partIds = content.split(/\r?\n/);
-  return partIds;
 }
 
 start();
