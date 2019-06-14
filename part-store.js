@@ -64,7 +64,7 @@ function uploadImage(fileName) {
 function uploadData(part) {
   let options = {
     method: 'POST',
-    url: `${process.env.STORE_URL}/api/part`,
+    url: `${process.env.STORE_URL}/api/v1/parts`,
     headers: {
       'Access-Token': process.env.ACCESS_TOKEN
     },

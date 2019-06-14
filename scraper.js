@@ -1,51 +1,52 @@
-const requestPromise = require('request-promise-native');
-const cheerio = require('cheerio');
+const { JSDOM } = require('jsdom');
 
 async function getPartData(partId) {
   try {
-    let content = await loadPage(partId);
-    let data = getFormattedData(parseContent(content));
+    let dom = await JSDOM.fromURL(`https://brickset.com/parts/${partId}`);
+    let data = extractPartData(dom.window.document);
 
-    if (data)
-      data.partId = partId;
+    if (typeof data === 'string') {
+      console.error('Parsing error: ' + data);
+      return null;
+    }
 
     return data;
   } catch (error) {
-    console.log(error.message);
+    console.error('Error: Could not load page');
     return null;
   }
 }
 
-function loadPage(partId) {
-  let options = {
-    url: `https://brickset.com/parts/${partId}`
-  };
+function extractPartData(document) {
+  let container = '.content .main';
+  let title = document.querySelector(container + ' > header > h1');
 
-  return requestPromise(options).then(response => response);
-}
+  if (!title || 0 === title.textContent.length)
+    return 'Title not found, part ID might be incorrect';
 
-function parseContent(content) {
-  let $ = cheerio.load(content);
-  let title = $('.content .main header > h1').text();
+  let partImage = document.querySelector(container + ' > .partimage');
 
-  if (!title)
-    return null;
+  if (!partImage)
+    return 'Image not found';
 
-  let sourceImageUrl = $('.content .main > .partimage').attr('src');
-  let properties = $('.content .featurebox .text dd');
+  let details = document.querySelectorAll('.content .featurebox > .text dd');
+
+  if (0 === details.length)
+    return 'Part details not found';
 
   return {
-    name: $(properties[1]).text(),
-    designId: $(properties[2]).text(),
-    colorFamily: $(properties[7]).text(),
-    color: $(properties[8]).text(),
-    rgb: $(properties[9]).find('span').text(),
-    colorType: $(properties[10]).text(),
-    legoColorId: $(properties[11]).text(),
-    sourceImageUrl
+    name: details[1].textContent,
+    designId: details[2].textContent,
+    colorFamily: details[7].textContent,
+    color: details[8].textContent,
+    rgb: details[9].children[0].textContent,
+    colorType: details[10].textContent,
+    legoColorId: details[11].textContent,
+    imageUrl: partImage.src
   }
 }
 
+/*
 function getFormattedData(data) {
   if (!data)
     return null;
@@ -63,6 +64,7 @@ function getFormattedData(data) {
     sourceImageUrl: data.sourceImageUrl
   }
 }
+*/
 
 module.exports = {
   getPartData

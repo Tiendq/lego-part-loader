@@ -10,5 +10,6 @@
   },
   "collectCoverageFrom" : [
     "*.js"
-  ]
+  ],
+  "verbose": true
 }

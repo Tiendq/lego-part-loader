@@ -1,5 +1,5 @@
 {
-  "name": "part-loader",
+  "name": "lego-part-loader",
   "version": "1.1.0",
   "main": "index.js",
   "repository": "https://github.com/tiendq/lego-part-loader.git",
@@ -7,16 +7,18 @@
   "license": "MIT",
   "scripts": {
     "start": "node index.js",
-    "test": "jest --config=jest.json --passWithNoTests"
+    "test": "jest --config=jest.json --passWithNoTests",
+    "test:watch": "jest --config=jest.json --watch --passWithNoTests"
   },
   "dependencies": {
     "chalk": "^2.3.0",
     "cheerio": "^1.0.0-rc.2",
     "dotenv-safe": "^6.1.0",
+    "jsdom": "^15.1.1",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5"
   },
   "devDependencies": {
-    "jest": "^22.4.3"
+    "jest": "^24.8.0"
   }
 }
