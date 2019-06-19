@@ -2,11 +2,15 @@ const fs = require('fs');
 const path = require('path');
 const requestPromise = require('request-promise-native');
 const chalk = require('chalk');
+const axios = require('axios');
 
 let log = console.log;
 
 async function uploadPart(part) {
-  let uploadedImage = await uploadImage(part.fileName);
+  // let uploadedImage = await uploadImage(part.fileName);
+  let uploadedImage = {
+    imageUrl: 'https://localhost/test.png'
+  }
 
   if (uploadedImage) {
     log(chalk.green(`Upload image ${part.id} successfully to ${uploadedImage.imageUrl}`));
@@ -61,34 +65,40 @@ function uploadImage(fileName) {
     });
 }
 
-function uploadData(part) {
+async function uploadData(part) {
   let options = {
-    method: 'POST',
-    url: `${process.env.STORE_URL}/api/v1/parts`,
     headers: {
       'Access-Token': process.env.ACCESS_TOKEN
-    },
-    body: {
-      ...part,
-      category: '1000',
-      active: false,
-      price: 0,
-      inventory: 0,
-      createdDate: new Date()
-    },
-    json: true,
-    simple: false,
-    resolveWithFullResponse: true
+    }
   }
 
-  return requestPromise(options)
-    .then(response => {
-      return 200 === response.statusCode ? response.body : null;
-    })
-    .catch(error => {
-      log(chalk.red(error.message));
+  let data = {
+    ...part,
+    category: '1000',
+    active: false,
+    price: 0,
+    inventory: 0,
+    createdDate: new Date()
+  }
+
+  try {
+    let response = await axios.post(`${process.env.API_URL}/parts`, data, options);
+
+    if (200 === response.status)
+      return response.data;
+    else
       return null;
-    });
+  } catch (error) {
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx.
+      console.error(error.response.data);
+      console.error(error.response.status);
+    }
+
+    console.error(error.message);
+    return null;
+  }
 }
 
 module.exports = {

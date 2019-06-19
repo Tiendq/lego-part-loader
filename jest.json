@@ -11,5 +11,6 @@
   "collectCoverageFrom" : [
     "*.js"
   ],
+  "globalSetup": "./test/setup.js",
   "verbose": true
 }
