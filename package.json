@@ -4,7 +4,7 @@
   "main": "index.js",
   "repository": "https://github.com/tiendq/lego-part-loader.git",
   "author": "Tien Do <tiendq@gmail.com>",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "scripts": {
     "start": "node index.js",
     "test": "jest --config=jest.json --coverage --passWithNoTests",
