@@ -1,37 +1,39 @@
-const fs = require('fs');
-const path = require('path');
-const requestPromise = require('request-promise-native');
-const chalk = require('chalk');
-const axios = require('axios');
-
+let fs = require('fs');
+let requestPromise = require('request-promise-native');
+let chalk = require('chalk');
 let log = console.log;
 
-async function uploadPart(part) {
-  // let uploadedImage = await uploadImage(part.fileName);
-  let uploadedImage = {
-    imageUrl: 'https://localhost/test.png'
-  }
+async function uploadParts(parts) {
+  let count = 0;
 
-  if (uploadedImage) {
-    log(chalk.green(`Upload image ${part.id} successfully to ${uploadedImage.imageUrl}`));
+  for (let part of parts) {
+    let uploadedImage = await uploadImage(part.fileName);
 
-    let result = await uploadData({
-      ...part.data,
-      imageUrl: uploadedImage.imageUrl
-    });
+    if (uploadedImage) {
+      log(chalk.green(`Upload image ${part.id} success`));
 
-    if (result) {
-      if (result.error) {
-        log(chalk.yellow(result.error));
+      let result = await uploadData({
+        ...part.data,
+        imageUrl: uploadedImage.imageUrl
+      });
+
+      if (result) {
+console.log('part %s, result: %O', part.partId, result);
+        if (result.error) {
+          log(chalk.yellow(result.error));
+        } else {
+          log(chalk.green(`Upload part ${part.id} success`));
+          ++ count;
+        }
       } else {
-        log(chalk.green(`Upload part ${part.id} success`));
+        log(chalk.red(`Failed upload part ${part.id}.`));
       }
     } else {
-      log(chalk.red(`Failed upload part ${part.id}.`));
+      log(chalk.red(`Failed upload part image ${part.id}. Ignore this part.`));
     }
-  } else {
-    log(chalk.red(`Failed upload part image ${part.id}. Ignore this part.`));
   }
+
+  return count;
 }
 
 function uploadImage(fileName) {
@@ -43,9 +45,9 @@ function uploadImage(fileName) {
     },
     formData: {
       image: {
-        value: fs.createReadStream(fileName),
+        value: fs.createReadStream(`temp/${fileName}`),
         options: {
-          filename: path.basename(fileName),
+          filename: fileName,
           contentType: 'image/jpg'
         }
       }
@@ -53,7 +55,7 @@ function uploadImage(fileName) {
     json: true,
     simple: false,
     resolveWithFullResponse: true
-  }
+  };
 
   return requestPromise(options)
     .then(response => {
@@ -65,42 +67,40 @@ function uploadImage(fileName) {
     });
 }
 
-async function uploadData(part) {
+function uploadData(part) {
   let options = {
+    method: 'POST',
+    url: `${process.env.STORE_URL}/api/v1/parts`,
     headers: {
       'Access-Token': process.env.ACCESS_TOKEN
-    }
-  }
+    },
+    body: {
+      ...part,
+      category: '1000',
+      active: false,
+      price: 0,
+      inventory: 0,
+      createdDate: new Date()
+    },
+    json: true,
+    simple: false,
+    resolveWithFullResponse: true
+  };
 
-  let data = {
-    ...part,
-    category: '1000',
-    active: false,
-    price: 0,
-    inventory: 0,
-    createdDate: new Date()
-  }
+  return requestPromise(options)
+    .then(response => {
 
-  try {
-    let response = await axios.post(`${process.env.API_URL}/parts`, data, options);
 
-    if (200 === response.status)
-      return response.data;
-    else
+console.log(response.body);
+      return 200 === response.statusCode ? response.body : null;
+    })
+    .catch(error => {
+console.log(part.partId, error);
+      log(chalk.red(error.message));
       return null;
-  } catch (error) {
-    if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx.
-      console.error(error.response.data);
-      console.error(error.response.status);
-    }
-
-    console.error(error.message);
-    return null;
-  }
+    });
 }
 
 module.exports = {
-  uploadPart
-}
+  uploadParts
+};
