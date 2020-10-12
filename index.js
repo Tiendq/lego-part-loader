@@ -49,12 +49,13 @@ async function loadPartData(id) {
 
   let data = await scraper.getPartData(id);
 
+  // console.log(data);
+  // return null;
+
   if (!data)
     log(chalk.red('Parse error'));
-  else {
+  else
     log(chalk.green('Parse success'));
- // console.log(data);
-}
 
   return {
     id,

@@ -31,21 +31,30 @@ function parseContent(content) {
   if (!title)
     return null;
 
-  let sourceImageUrl = $('.content .main > .partimage')[0].attribs['data-cfsrc']; // .attr('src');
+  // 2020-10-12: Image link is stored in an A tag.
+  // <a href="/ajax/parts/mainImage?image=https%3a%2f%2fwww.lego.com%2fcdn%2fproduct-assets%2felement.img.lod5photo.192x192%2f6113039.jpg">Image</a>
+  let imageHref = $('.aside.tabs.top a')[0].attribs['href'];
+  // console.log(imageHref);
+  let x = imageHref.indexOf('?image=');
+  let sourceImageUrl = imageHref.slice(x + '?image='.length);
   let properties = $('.content .featurebox .text dd');
 
-  // console.log(sourceImageUrl);
+  // for (i = 0; i < properties.length; ++i)
+    // console.log(i, $(properties[i]).text());
 
-  return {
+  let data = {
     name: $(properties[1]).text(),
     designId: $(properties[2]).text(),
-    colorFamily: $(properties[7]).text(),
-    color: $(properties[8]).text(),
-    rgb: $(properties[9]).find('span').text(),
-    colorType: $(properties[10]).text(),
-    legoColorId: $(properties[11]).text(),
-    sourceImageUrl
+    colorFamily: $(properties[6]).text(),
+    color: $(properties[7]).text(),
+    rgb: $(properties[8]).text().slice(1,8),
+    colorType: $(properties[9]).text(),
+    legoColorId: $(properties[10]).text(),
+    sourceImageUrl: decodeURIComponent(sourceImageUrl)
   };
+
+  // console.log(data);
+  return data;
 }
 
 function getFormattedData(data) {
